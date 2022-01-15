@@ -1,14 +1,10 @@
-/**
- * @param {number[][]} grid
- * @return {number}
- */
 var minPathSum = function (grid) {
   let minValue = Number.MAX_SAFE_INTEGER;
   const lastXPos = grid[0].length - 1;
   const lastYPos = grid.length - 1;
   const duplicated = new Array(lastYPos + 1)
     .fill(0)
-    .map((_) => new Array(lastXPos + 1).fill(Number.MAX_SAFE_INTEGER));
+    .map((_) => new Array(lastXPos + 1));
 
   helper(0, 0, 0);
 
@@ -37,11 +33,3 @@ var minPathSum = function (grid) {
     }
   }
 };
-
-console.log(
-  minPathSum([
-    [1, 3, 1],
-    [1, 5, 1],
-    [4, 2, 1],
-  ])
-);
