@@ -1,18 +1,16 @@
 var canVisitAllRooms = function (rooms) {
-  const visited = new Array(rooms.length).fill(0);
-
   const queue = [[0]];
 
   while (queue.length) {
     const nextRooms = queue.shift();
 
     for (const room of nextRooms) {
-      if (!visited[room]) {
+      if (rooms[room]) {
         queue.push(rooms[room]);
-        visited[room] = 1;
+        rooms[room] = 0;
       }
     }
   }
 
-  return !visited.includes(0);
+  return !rooms.some((val) => Array.isArray(val));
 };
