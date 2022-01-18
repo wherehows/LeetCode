@@ -20,5 +20,3 @@ var canVisitAllRooms = function (rooms) {
 
   return !visited;
 };
-
-console.log(canVisitAllRooms([[1, 3], [3, 0, 1], [0], [2]]));
