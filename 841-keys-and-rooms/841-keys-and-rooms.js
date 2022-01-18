@@ -1,4 +1,9 @@
+/**
+ * @param {number[][]} rooms
+ * @return {boolean}
+ */
 var canVisitAllRooms = function (rooms) {
+  let visited = rooms.length;
   const queue = [[0]];
 
   while (queue.length) {
@@ -8,9 +13,12 @@ var canVisitAllRooms = function (rooms) {
       if (rooms[room]) {
         queue.push(rooms[room]);
         rooms[room] = 0;
+        visited--;
       }
     }
   }
 
-  return !rooms.some((val) => Array.isArray(val));
+  return !visited;
 };
+
+console.log(canVisitAllRooms([[1, 3], [3, 0, 1], [0], [2]]));
