@@ -1,84 +1,155 @@
 const maxProbability = (n, edges, succProb, start, end) => {
-    const probs = Array(n).fill(0)
-    const pq = PQ( probs )
-    const edgeMap = edges.reduce( ( map, [ a, b ], i ) => {
-        map[ a ].push( [ b, succProb[i] ] )
-        map[ b ].push( [ a, succProb[i] ] )
-        return map
-    }, Array.from({length:n},() => []) )
+  const edgeMap = edges.reduce(
+    (map, [a, b], i) => {
+      map[a].push([b, succProb[i]]);
+      map[b].push([a, succProb[i]]);
+      return map;
+    },
+    Array.from({ length: n }, () => [])
+  );
 
-    pq.update( start, 1 )
+  const probs = new Array(n).fill(0);
+  const pq = new PriorityQueue();
 
-    while ( ! pq.empty() ) {
-        const nodeID = pq.takeBest()
-        if ( nodeID === end ) return probs[end]
-        if ( ! edgeMap[ nodeID ] ) continue
+  pq.enqueue(start, 1);
+  probs[start] = 1;
 
-        edgeMap[ nodeID ].forEach( ([ toID, prob ]) => {
-            if ( probs[nodeID] * prob > probs[toID] ) {
-                pq.update( toID, probs[nodeID] * prob )
-            }
-        })
+  while (pq.getTotalNumberOfNodes()) {
+    const { number, probability } = pq.dequeue();
+    if (number === end) return probability;
+    if (!edgeMap[number]) continue;
+
+    const nextVertexs = edgeMap[number];
+
+    for (const [vertex, prob] of nextVertexs) {
+      if (!probs[vertex] || probs[vertex] < prob * probability) {
+        probs[vertex] = prob * probability;
+        pq.enqueue(vertex, probability * prob);
+      }
+    }
+  }
+
+  return probs[end];
+};
+
+class PriorityQueue {
+  constructor() {
+    this.values = [];
+  }
+
+  enqueue(number, probability) {
+    const newNode = { number, probability };
+    this.values.push(newNode);
+
+    if (this.getTotalNumberOfNodes() > 1) {
+      this.bubbleUp();
+    }
+  }
+
+  dequeue() {
+    this.swap(0, this.getTotalNumberOfNodes() - 1);
+    const res = this.values.pop();
+
+    if (this.getTotalNumberOfNodes() > 1) {
+      this.bubbleDown();
     }
 
-    return probs[end]
+    return res;
+  }
+
+  getTotalNumberOfNodes() {
+    return this.values.length;
+  }
+
+  print() {}
+
+  bubbleUp() {
+    let childIndex = this.values.length - 1;
+    let childPriority = this.values[childIndex].probability;
+    let parentIndex = Math.floor((childIndex - 1) / 2);
+    let parentPriority = this.values[parentIndex].probability;
+
+    while (true) {
+      if (parentPriority < childPriority) {
+        this.swap(childIndex, parentIndex);
+      } else {
+        break;
+      }
+
+      childIndex = parentIndex;
+
+      if (childIndex === 0) break;
+
+      parentIndex = Math.floor((childIndex - 1) / 2);
+      parentPriority = this.values[parentIndex].probability;
+    }
+  }
+
+  bubbleDown() {
+    let parentIndex = 0;
+    let parentPriority = this.values[parentIndex]?.probability;
+    let leftChildIndex = parentIndex * 2 + 1;
+    let leftChildPriority = this.values[leftChildIndex]?.probability;
+    let rightChildIndex = parentIndex * 2 + 2;
+    let rightChildPriority = this.values[rightChildIndex]?.probability;
+
+    while (true) {
+      let indexToSwap = null;
+
+      if (parentPriority < leftChildPriority) {
+        indexToSwap = leftChildIndex;
+      }
+
+      if (
+        (indexToSwap && leftChildPriority < rightChildPriority) ||
+        (!indexToSwap && parentPriority < rightChildPriority)
+      ) {
+        indexToSwap = rightChildIndex;
+      }
+
+      if (!indexToSwap) break;
+
+      this.swap(indexToSwap, parentIndex);
+
+      parentIndex = indexToSwap;
+      leftChildIndex = parentIndex * 2 + 1;
+      leftChildPriority =
+        leftChildIndex <= this.getTotalNumberOfNodes() - 1 &&
+        this.values[leftChildIndex].probability;
+      rightChildIndex = parentIndex * 2 + 2;
+      rightChildPriority =
+        rightChildIndex <= this.getTotalNumberOfNodes() - 1 &&
+        this.values[rightChildIndex].probability;
+    }
+  }
+
+  swap(temp1, temp2) {
+    [this.values[temp2], this.values[temp1]] = [
+      this.values[temp1],
+      this.values[temp2],
+    ];
+  }
 }
 
-const PQ = ( probs ) => {
-    const heap = []
-    const vertexMap = probs.reduce( ( obj, prob, i ) => {
-        obj[ i ] = i
-        heap[ i ] = i
-        return obj
-    }, {} )
-    
-    const empty = () => heap.length === 0
-    const parent = i => ~~( i / 2 )
-    const leftChild = i => i * 2 + 1
-    const rightChild = i => i * 2 + 2
-    
-    const takeBest = () => {
-        swap( 0, heap.length - 1 )
-        const best = heap.pop()
-        
-        siftDown( 0 )
-        
-        return best
-    }
-    const update = ( vertex, value ) => {
-        probs[ vertex ] = value
-        
-        siftUp( vertexMap[ vertex ] )
+console.log(
+  maxProbability(
+    3,
+    [
+      [0, 1],
+      [1, 2],
+      [0, 2],
+    ],
+    [0.5, 0.5, 0.2],
+    0,
+    2
+  )
+);
 
-    }
-    
-    const siftDown = ( i ) => {
-        const l = leftChild( i )
-        const r = rightChild( i )
-        const c = ! r ? l : probs[heap[l]] > probs[heap[r]] ? l : r
+// const node = new PriorityQueue();
+// node.enqueue(1, 0);
+// node.enqueue(1, 3);
+// node.enqueue(1, 2);
+// node.enqueue(1, 1);
+// node.enqueue(1, 4);
 
-        if ( c && probs[heap[c]] > probs[heap[i]] ) {
-            swap( c, i )
-            siftDown( c )
-        }
-    }
-    const siftUp = ( i ) => {
-        if ( 0 === i ) return
-        const p = parent( i )
-        
-        if ( probs[heap[p]] < probs[heap[i]] ) {
-            swap( p, i )
-            siftUp( p )
-        }
-    }
-    const swap = ( i, j ) => {
-        const hold = heap[i]
-        heap[i] = heap[j]
-        heap[j] = hold
-        
-        vertexMap[heap[i]] = i
-        vertexMap[heap[j]] = j
-    }
-    
-    return { empty, takeBest, update }
-}
+// node.dequeue();
