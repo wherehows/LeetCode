@@ -1,33 +1,30 @@
-var findCircleNum = function(M) {
-  
-    class UnionFind {
-        constructor(n) {
-            this.graph = [...Array(n)].map((_, i) => i);
-            this.groups = n;
-        }
-        
-        find(id) {
-            if(this.graph[id] === id) return id;
-            this.graph[id] = this.find(this.graph[id]);
-            return this.graph[id];
-        }
-        
-        union(x, y) {
-            const rootX = this.find(x);
-            const rootY = this.find(y);
-            if(rootX !== rootY) {
-                this.graph[rootY] = rootX;
-                this.groups--;
-            }
-        }
-    }
+/**
+ * @param {number[][]} isConnected
+ * @return {number}
+ */
+var findCircleNum = function (isConnected) {
+  const uf = new UnionFind(isConnected);
 
-    const N = M.length, unionfind = new UnionFind(N);
-    
-    for(let r = 0; r < N; r++) {
-        for(let c = 0; c < N; c++) {
-            if(M[r][c]) unionfind.union(r, c);
-        }
+  for (let i = 0; i < isConnected[0].length; i++) {
+    for (let j = 0; j < isConnected.length; j++) {
+      if (isConnected[i][j] === 1) uf.union(i, j);
     }
-    return unionfind.groups;
+  }
+
+  console.log(new Set(uf.parents));
+
+  return new Set(uf.parents.map((m, i) => uf.find(i))).size;
 };
+
+function UnionFind(nodes) {
+  this.parents = Array.from({ length: nodes.length }, (_, index) => index);
+
+  this.find = (index) => {
+    if (this.parents[index] === index) return index;
+    else return this.find(this.parents[index]);
+  };
+
+  this.union = (y, x) => {
+    this.parents[this.find(y)] = this.find(x);
+  };
+}
