@@ -3,6 +3,7 @@
  * @param {number[][]} dislikes
  * @return {boolean}
  */
+
 var possibleBipartition = function (n, dislikes) {
   const edgeMap = dislikes.reduce((map, [a, b]) => {
     if (map.has(a)) {
