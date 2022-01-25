@@ -3,37 +3,35 @@
  * @param {number[][]} prerequisites
  * @return {boolean}
  */
-var canFinish = function(numCourses, prerequisites) {
-  const order = [];
+var canFinish = function (numCourses, prerequisites) {
   const queue = [];
-  const graph = new Map();
-  const indegree = Array(numCourses).fill(0);
+  let visitedCount = 0;
 
-  for (const [e, v] of prerequisites) {
-    // build graph map
-    if (graph.has(v)) {
-      graph.get(v).push(e);
-    } else {
-      graph.set(v, [e]);
-    }
-    // build indegree array
-    indegree[e]++;
-  }
+  const inDegrees = Array.from({ length: numCourses }, () => 0);
 
-  for (let i = 0; i < indegree.length; i++) {
-    if (indegree[i] === 0) queue.push(i);
-  }
+  const edgeMap = prerequisites.reduce((map, [a, b]) => {
+    map.set(b, [...(map.get(b) || []), a]);
+    inDegrees[a]++;
+
+    return map;
+  }, new Map());
+
+  inDegrees.forEach((inDegree, i) => {
+    if (inDegree === 0) queue.push(i);
+  });
 
   while (queue.length) {
-    const v = queue.shift();
-    if (graph.has(v)) {
-      for (const e of graph.get(v)) {
-        indegree[e]--;
-        if (indegree[e] === 0) queue.push(e);
+    const vertex = queue.shift();
+    if (edgeMap.has(vertex)) {
+      const nextVertexs = edgeMap.get(vertex);
+      for (const nextVertex of nextVertexs) {
+        inDegrees[nextVertex]--;
+        if (inDegrees[nextVertex] === 0) queue.push(nextVertex);
       }
     }
-    order.push(v);
+
+    visitedCount++;
   }
 
-  return numCourses === order.length;
+  return numCourses === visitedCount;
 };
