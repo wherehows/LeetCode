@@ -3,57 +3,37 @@
  * @param {number[][]} prerequisites
  * @return {boolean}
  */
-
-let visiting;   // is being explored
-let visited;  // is already explored
-let graph;
-
 var canFinish = function(numCourses, prerequisites) {
-    graph = new Map();
-    visiting = new Set();
-    visited = new Set();
-    
-    for(let [v, e] of prerequisites){
-        if(graph.has(v)){
-            let edges = graph.get(v);
-            edges.push(e);
-            graph.set(v,edges);
-        }else{
-            graph.set(v,[e]);
-        }
+  const order = [];
+  const queue = [];
+  const graph = new Map();
+  const indegree = Array(numCourses).fill(0);
+
+  for (const [e, v] of prerequisites) {
+    // build graph map
+    if (graph.has(v)) {
+      graph.get(v).push(e);
+    } else {
+      graph.set(v, [e]);
     }
-    
-    for(const [v,e] of graph){
-        if(DFS(v)){
-            return false; //if cyclic it will not finish so it is false
-        }
+    // build indegree array
+    indegree[e]++;
+  }
+
+  for (let i = 0; i < indegree.length; i++) {
+    if (indegree[i] === 0) queue.push(i);
+  }
+
+  while (queue.length) {
+    const v = queue.shift();
+    if (graph.has(v)) {
+      for (const e of graph.get(v)) {
+        indegree[e]--;
+        if (indegree[e] === 0) queue.push(e);
+      }
     }
-    
-    return true;
-}
+    order.push(v);
+  }
 
-var DFS = function(v){
-    visiting.add(v);
-    let edges = graph.get(v);   // get all the edges to explore
-    
-    if(edges){
-        //console.log(edges)
-       for(let e of edges){
-            if(visited.has(e)){ //skip if it is explored already
-                continue;
-            }
-
-            if(visiting.has(e)){ //found e is being explored
-                return true;
-            }
-
-            if(DFS(e)){ // DFS deeper if this e is cyclic
-                return true;
-            }
-        } 
-    }   
-    
-    visiting.delete(v); // remove from visiting set when all decedant v are visited
-    visited.add(v);
-    return false;
-}
+  return numCourses === order.length;
+};
