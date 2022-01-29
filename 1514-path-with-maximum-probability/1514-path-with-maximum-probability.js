@@ -1,22 +1,46 @@
-var maxProbability = function(n, edges, succProb, start, end) {
-  const p = Array(n).fill(0);
-  const graph = p.reduce((m, _, i) => m.set(i, []), new Map());
-  edges.forEach(([u, v], i) => {
-    graph.get(u).push([v, succProb[i]]);
-    graph.get(v).push([u, succProb[i]]);
-  });
-  
+/**
+ * @param {number} n
+ * @param {number[][]} edges
+ * @param {number[]} succProb
+ * @param {number} start
+ * @param {number} end
+ * @return {number}
+ */
+var maxProbability = function (n, edges, succProb, start, end) {
+  const edgeMap = edges.reduce((map, [a, b], i) => {
+    map.set(b, [...(map.get(b) || []), [a, succProb[i]]]);
+    map.set(a, [...(map.get(a) || []), [b, succProb[i]]]);
+    return map;
+  }, new Map());
+
+  const visited = Array.from({ length: n }, () => -Infinity); // 확률이니까 0으로 초기화
+
   const queue = [[start, 1]];
-  p[start] = 1;
-  
-  for (let [node, currP] of queue) {   
-    for (let [adj, nextP] of graph.get(node)) {
-      if (currP * nextP > p[adj]) {
-        p[adj] = currP * nextP;
-        queue.push([adj, p[adj]]);
+  visited[start] = 1;
+
+  let res = 0;
+
+  while (queue.length) {
+    const [next, prob] = queue.shift();
+
+    if (next === end) {
+      res = Math.max(res, prob);
+      continue;
+    }
+
+    if (visited[next] > prob) continue;
+
+    const vertexsToVisit = edgeMap.get(next);
+
+    if (vertexsToVisit) {
+      for (const [nextVertex, nextProb] of vertexsToVisit) {
+        if (visited[nextVertex] < nextProb * prob) {
+          visited[nextVertex] = nextProb * prob;
+          queue.push([nextVertex, nextProb * prob]);
+        }
       }
     }
   }
-  
-  return p[end];
+
+  return res;
 };
