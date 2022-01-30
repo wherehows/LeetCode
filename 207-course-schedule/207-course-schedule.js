@@ -1,32 +1,26 @@
 var canFinish = function (numCourses, prerequisites) {
+  const inDegrees = Array.from({ length: numCourses }, () => 0);
+
   const edgeMap = prerequisites.reduce((map, [a, b]) => {
     map.set(b, [...(map.get(b) || []), a]);
+    inDegrees[a]++;
     return map;
   }, new Map());
 
-  const visited = new Set();
-  const visiting = new Set();
+  const queue = inDegrees.reduce((arr, current, i) => {
+    if (current === 0) arr.push(i);
+    return arr;
+  }, []);
 
-  for (const [a, b] of edgeMap) {
-    if (isCyclic(a)) return false;
-  }
-
-  return true;
-
-  function isCyclic(currentVertex) {
-    const nextVertics = edgeMap.get(currentVertex);
-    visiting.add(currentVertex);
-
+  while (queue.length) {
+    const nextVertics = edgeMap.get(queue.shift());
     if (nextVertics) {
       for (const nextVertex of nextVertics) {
-        if (visited.has(nextVertex)) continue;
-        if (visiting.has(nextVertex)) return true;
-        if (isCyclic(nextVertex)) return true;
+        inDegrees[nextVertex]--;
+        if (inDegrees[nextVertex] === 0) queue.push(nextVertex);
       }
     }
-
-    visited.add(currentVertex);
-    visiting.delete(currentVertex);
-    return false;
   }
+
+  return !inDegrees.some((val) => val > 0);
 };
