@@ -8,19 +8,18 @@ var getRow = function (rowIndex) {
 
   if (rowIndex <= 1) return rowIndex === 0 ? zero : first;
 
-  return helper(1, [1, 1]);
+  let prior = [1, 1];
 
-  function helper(currentLevel, prior) {
-    if (currentLevel === rowIndex) return prior;
-
+  for (let i = 2; i <= rowIndex; i++) {
     const next = [1];
 
-    for (let index = 0; index < currentLevel; index++) {
-      next.push(prior[index] + prior[index + 1]);
+    for (let j = 1; j < i; j++) {
+      next.push(prior[j - 1] + prior[j]);
     }
 
     next.push(1);
-
-    return helper(currentLevel + 1, next);
+    prior = next;
   }
+
+  return prior;
 };
