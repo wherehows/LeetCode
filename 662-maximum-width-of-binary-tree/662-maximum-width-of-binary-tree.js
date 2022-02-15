@@ -1,18 +1,19 @@
-var widthOfBinaryTree = function(root) {
-    const minPos = [0];
-    let maxWidth = 0;
-    
-    callDFS(root, 0, 0);
-    return maxWidth;
-    
-    function callDFS(node, level, pos) {
-        if(!node) return;
-        if(minPos[level] === undefined) minPos.push(pos);
-        
-        const diff = pos - minPos[level];
-        maxWidth = Math.max(maxWidth, diff+1);
-        
-        callDFS(node.left, level+1, diff*2);
-        callDFS(node.right, level+1, diff*2+1);
-    }
+var widthOfBinaryTree = function (root) {
+  let startOfEachLevel = [];
+  let res = 0;
+
+  helper(root, 0, 1);
+
+  return res;
+
+  function helper(root, index, level) {
+    if (!root) return;
+    if (startOfEachLevel[level] === undefined) startOfEachLevel[level] = index;
+
+    const width = index - startOfEachLevel[level] + 1;
+    res = Math.max(res, width);
+
+    helper(root.left, width * 2, level + 1);
+    helper(root.right, width * 2 + 1, level + 1);
+  }
 };
