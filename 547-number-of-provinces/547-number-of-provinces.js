@@ -3,28 +3,29 @@
  * @return {number}
  */
 var findCircleNum = function (isConnected) {
-  const uf = new UnionFind(isConnected);
+  const uf = new UnionFind(isConnected.length);
 
-  for (let i = 0; i < isConnected[0].length; i++) {
-    for (let j = 0; j < isConnected.length; j++) {
-      if (isConnected[i][j] === 1) uf.union(i, j);
+  for (let i = 0; i < isConnected.length; i++) {
+    for (let j = i; j < isConnected[0].length; j++) {
+      if (i === j) continue;
+      else if (isConnected[i][j]) uf.union(i, j);
     }
   }
 
-  console.log(new Set(uf.parents));
+  return new Set(uf.value.filter((val, index) => val === index)).size;
 
-  return new Set(uf.parents.map((m, i) => uf.find(i))).size;
+  function UnionFind(nodeCounts) {
+    this.value = new Array(nodeCounts).fill(0).map((_, index) => index);
+    this.find = (p) => {
+      if (this.value[p] === p) return p;
+      else return this.find(this.value[p]);
+    };
+    this.union = (y, x) => {
+      const xParent = this.find(x);
+      const yParent = this.find(y);
+
+      if (xParent > yParent) this.value[xParent] = yParent;
+      else this.value[yParent] = xParent;
+    };
+  }
 };
-
-function UnionFind(nodes) {
-  this.parents = Array.from({ length: nodes.length }, (_, index) => index);
-
-  this.find = (index) => {
-    if (this.parents[index] === index) return index;
-    else return this.find(this.parents[index]);
-  };
-
-  this.union = (y, x) => {
-    this.parents[this.find(y)] = this.find(x);
-  };
-}
