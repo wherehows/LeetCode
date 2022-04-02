@@ -1,34 +1,27 @@
-/**
- * @param {number} num
- * @return {number}
- */
 var maximumSwap = function (num) {
-  num = num + "";
-  let array = num.split("").sort();
-  let minimumIndex = null;
-  let maximumIndex = array.length - 1;
-  let res = num.split("");
+  num = num.toString().split("");
 
-  for (let i = 0; i < num.length; i++) {
-    if (array[maximumIndex] === num[i]) {
-      maximumIndex--;
+  let maxPosition = num.length - 1;
+  let posToChange = [];
+
+  for (let i = num.length - 1; i >= 0; i--) {
+    if (num[maxPosition] < num[i]) {
+      maxPosition = i;
+      posToChange[i] = i;
       continue;
     }
 
-    minimumIndex = i;
-
-    let j = num.length - 1;
-
-    while (num[j] !== array[maximumIndex]) {
-      j--;
-      if (j === i) break;
-    }
-
-    [res[j], res[minimumIndex]] = [res[minimumIndex], res[j]];
-    break;
+    posToChange[i] = maxPosition;
   }
 
-  return Number(res.join(""));
-};
+  console.log(posToChange);
 
-console.log(maximumSwap(2736));
+  for (let i = 0; i < num.length; i++) {
+    if (num[i] < num[posToChange[i]]) {
+      [num[i], num[posToChange[i]]] = [num[posToChange[i]], num[i]];
+      break;
+    }
+  }
+
+  return +num.join("");
+};
