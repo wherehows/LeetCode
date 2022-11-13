@@ -34,13 +34,12 @@ class UnionFind {
         if(r1 === r2) {
             return;
         }
-        if(this.rank[r1] > this.rank[r2]) {
+        if(this.root[r1] > this.root[r2]) {
             this.root[r2] = r1;
-        } else if(this.rank[r1] < this.rank[r2]) {
+        } else if(this.root[r1] < this.root[r2]) {
             this.root[r1] = r2;
         } else {
             this.root[r2] = r1;
-            this.rank[r1] += 1;
         }
     }
     disjointSets() {
